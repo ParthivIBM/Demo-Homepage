@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
+import { fetchProducts } from '../api';
 import './ProductList.css';
 
 const TABS = ['Top Rated', 'Best Selling', 'Latest Products'];
@@ -11,19 +12,17 @@ function ProductList({ searchQuery = '' }) {
   const [activeTab, setActiveTab] = useState('Top Rated');
 
   useEffect(() => {
-    fetch('https://dummyjson.com/products')
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch products');
-        return res.json();
-      })
-      .then((data) => {
-        setProducts(data.products);
-        setLoading(false);
-      })
-      .catch((err) => {
+    async function load() {
+      try {
+        const products = await fetchProducts();
+        setProducts(products);
+      } catch (err) {
         setError(err.message);
+      } finally {
         setLoading(false);
-      });
+      }
+    }
+    load();
   }, []);
 
   const query = searchQuery.toLowerCase().trim();

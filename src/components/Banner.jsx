@@ -21,7 +21,7 @@ function Banner() {
         <div className="banner__image-wrap">
           <div className="banner__image-circle">
             <img
-              src="https://picsum.photos/seed/banner-hero/480/480"
+              src="https://static.vecteezy.com/system/resources/previews/020/933/220/non_2x/shopping-with-mobile-app-on-their-smartphones-man-and-woman-shopping-online-store-sale-discount-promot-special-percent-design-vector.jpg"
               alt="Featured product"
               className="banner__image"
             />

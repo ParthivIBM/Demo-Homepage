@@ -1,0 +1,484 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Codebase Deep-Dive</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.65;
+    color: #1f2328;
+    background: #ffffff;
+    padding: 32px 16px 48px;
+  }
+  .page { max-width: 760px; margin: 0 auto; }
+
+  h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  h2 { font-size: 16px; font-weight: 700; margin: 32px 0 10px; color: #1f2328; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; }
+  h3 { font-size: 13px; font-weight: 700; margin: 18px 0 6px; color: #1f2328; }
+  p  { color: #57606a; margin-bottom: 10px; }
+  p:last-child { margin-bottom: 0; }
+  ul, ol { padding-left: 20px; color: #57606a; margin-bottom: 10px; }
+  li { margin-bottom: 4px; }
+  strong { color: #1f2328; font-weight: 600; }
+
+  .subtitle { font-size: 13px; color: #57606a; margin-bottom: 28px; }
+
+  /* File cards */
+  .file-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .file-card__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f7f8fa;
+    padding: 10px 16px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .file-card__path {
+    font-size: 12px;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-weight: 600;
+    color: #1f2328;
+  }
+  .badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .badge--new   { background: #dcfce7; color: #166534; }
+  .badge--mod   { background: #fef3c7; color: #92400e; }
+  .badge--core  { background: #e0e7ff; color: #3730a3; }
+  .file-card__body { padding: 14px 16px; }
+
+  /* Concept pills */
+  .concepts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .concept {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    color: #57606a;
+  }
+
+  /* Code inline */
+  code {
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 12px;
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 3px;
+    padding: 1px 5px;
+    color: #1f2328;
+  }
+
+  /* Flow diagram using pure CSS/HTML */
+  .flow {
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 16px;
+    margin: 12px 0;
+    font-size: 12px;
+    color: #57606a;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    line-height: 1.9;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  /* Divider */
+  .divider { border: none; border-top: 1px solid #e5e7eb; margin: 28px 0; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
+  th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+  th { background: #f7f8fa; font-weight: 600; color: #1f2328; width: 28%; }
+  td { color: #57606a; }
+  tr:last-child th, tr:last-child td { border-bottom: none; }
+
+  /* Callout */
+  .callout {
+    border-left: 3px solid #3b82d4;
+    background: #f0f6ff;
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    margin: 10px 0;
+    font-size: 13px;
+    color: #57606a;
+  }
+  .callout strong { color: #1e40af; }
+
+  footer.page-footer {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+    font-size: 12px;
+    color: #9ca3af;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Codebase Deep-Dive</h1>
+  <p class="subtitle">Every file, every feature, every React pattern — explained in full.</p>
+
+  
+  <h2>1 · Architecture Overview</h2>
+
+  <p>The app is a <strong>Create React App</strong> project using <strong>React 19</strong>. It has two pages, a shared API layer, and shared layout components. There is no global state manager — data flows top-down through props.</p>
+
+  <div class="flow">App.js  (BrowserRouter)
+├── Route "/"              → pages/Home.jsx
+│     ├── Header
+│     ├── Banner
+│     ├── ProductList  ──→  api.js → fetchProducts()
+│     │     └── ProductCard  (Link to /products/:id)
+│     └── Footer
+│
+└── Route "/products/:id"  → pages/ProductDetail.jsx
+      ├── Header
+      ├── main (all product sections)
+      └── Footer</div>
+
+  <div class="callout"><strong>Data layer:</strong> All raw <code>fetch()</code> calls live exclusively in <code>src/api.js</code>. Components never call <code>fetch</code> directly — they import named async functions. This is the standard separation-of-concerns pattern.</div>
+
+  
+  <h2>2 · File-by-File Breakdown</h2>
+
+  
+  <div class="file-card">
+    <div class="file-card__header">
+      <span class="file-card__path">src/App.js</span>
+      <span class="badge badge--mod">modified</span>
+    </div>
+    <div class="file-card__body">
+      <div class="concepts">
+        <span class="concept">BrowserRouter</span>
+        <span class="concept">Routes / Route</span>
+        <span class="concept">Client-side routing</span>
+      </div>
+      <h3>What it does</h3>
+      <p>The root of the React tree. It wraps everything in <code>BrowserRouter</code>, which gives every descendant component access to React Router's navigation hooks and context. Inside it declares exactly two routes:</p>
+      <ul>
+        <li><code>path="/"</code> renders <code>Home</code></li>
+        <li><code>path="/products/:id"</code> renders <code>ProductDetail</code>, where <code>:id</code> is a dynamic URL segment (e.g. <code>/products/3</code>)</li>
+      </ul>
+      <h3>Why BrowserRouter here</h3>
+      <p><code>BrowserRouter</code> uses the HTML5 History API so URLs look clean (<code>/products/3</code>) rather than hash-based (<code>/#/products/3</code>). It must wrap the entire app exactly once, at the top level — that's why it lives in <code>App.js</code> and not inside any individual page.</p>
+    </div>
+  </div>
+
+  
+  <div class="file-card">
+    <div class="file-card__header">
+      <span class="file-card__path">src/api.js</span>
+      <span class="badge badge--new">new</span>
+    </div>
+    <div class="file-card__body">
+      <div class="concepts">
+        <span class="concept">async / await</span>
+        <span class="concept">fetch API</span>
+        <span class="concept">Named exports</span>
+        <span class="concept">Error throwing</span>
+      </div>
+      <h3>What it does</h3>
+      <p>A pure data-access module. It exports two async functions and nothing else:</p>
+      <ul>
+        <li><strong>fetchProducts()</strong> — calls <code>https://dummyjson.com/products</code>, checks <code>res.ok</code>, and returns the <code>products</code> array directly (not the full response object).</li>
+        <li><strong>fetchProductById(id)</strong> — calls <code>https://dummyjson.com/products/{id}</code> and returns the full product object.</li>
+      </ul>
+      <h3>Why a separate file</h3>
+      <p>Putting <code>fetch()</code> directly inside a component couples the component to a specific URL and response shape, making it hard to test, reuse, or change later. By isolating it here, any component can call <code>fetchProductById(5)</code> without knowing anything about HTTP. The <code>BASE_URL</code> constant means the API host is only written once.</p>
+      <h3>Error handling pattern</h3>
+      <p>Both functions <strong>throw</strong> an <code>Error</code> when the HTTP response is not OK (e.g. 404, 500). The calling component catches this in its own <code>try/catch</code> and stores the error message in state, which it then renders as an error message. This keeps error-display logic in the UI layer where it belongs.</p>
+    </div>
+  </div>
+
+  
+  <div class="file-card">
+    <div class="file-card__header">
+      <span class="file-card__path">src/pages/Home.jsx</span>
+      <span class="badge badge--mod">modified</span>
+    </div>
+    <div class="file-card__body">
+      <div class="concepts">
+        <span class="concept">useState</span>
+        <span class="concept">useEffect</span>
+        <span class="concept">useRef</span>
+        <span class="concept">useLocation</span>
+        <span class="concept">URLSearchParams</span>
+        <span class="concept">scrollIntoView</span>
+        <span class="concept">Lazy state initialiser</span>
+      </div>
+      <h3>What it does</h3>
+      <p>The homepage. It owns the <code>searchQuery</code> string and passes it down to both <code>Header</code> (to display in the input) and <code>ProductList</code> (to filter the grid). It also handles scroll-to-products behaviour.</p>
+
+      <h3>Lazy state initialiser</h3>
+      <p><code>useState(() =&gt; { ... })</code> — the function passed to <code>useState</code> runs only once on the initial render. It reads <code>?search=</code> from the current URL so that if you arrive at <code>/?search=shoes</code>, the search field is pre-filled and the product list is already filtered. Without the lazy initialiser, the state would always start empty.</p>
+
+      <h3>useLocation + URLSearchParams</h3>
+      <p><code>useLocation()</code> returns the current URL's location object. <code>location.search</code> is the query string (e.g. <code>?search=shoes</code>). Wrapping it in <code>new URLSearchParams(location.search).get('search')</code> safely extracts the value. The <code>useEffect</code> that watches <code>location.search</code> re-syncs the state whenever the URL changes — for example when React Router's back/forward is used.</p>
+
+      <h3>handleSearchChange + useRef (scroll deduplication)</h3>
+      <p>When the user types a search, this function is called on every keystroke. Without the guard, <code>scrollIntoView</code> would fire on every single character, making the page scroll repeatedly while typing. <code>useRef</code> stores the <em>previous submitted query</em> (it persists between renders but doesn't trigger re-renders). The scroll only fires when the new trimmed query is different from what was previously submitted — meaning it triggers exactly once per search action, not once per keystroke.</p>
+
+      <h3>Mount-time scroll (arriving from ProductDetail)</h3>
+      <p>The second <code>useEffect</code> with <code>[]</code> runs once on mount. If the URL contains <code>?search=</code> (because the user searched from the ProductDetail page and was navigated here), it scrolls the page to the product list automatically. The <code>setTimeout(..., 50)</code> gives the DOM time to finish rendering before scrolling.</p>
+    </div>
+  </div>
+
+  
+  <div class="file-card">
+    <div class="file-card__header">
+      <span class="file-card__path">src/pages/ProductDetail.jsx</span>
+      <span class="badge badge--new">new</span>
+    </div>
+    <div class="file-card__body">
+      <div class="concepts">
+        <span class="concept">useParams</span>
+        <span class="concept">useNavigate</span>
+        <span class="concept">useState</span>
+        <span class="concept">useEffect</span>
+        <span class="concept">Async data fetching</span>
+        <span class="concept">Controlled image gallery</span>
+        <span class="concept">Scroll-to-top</span>
+        <span class="concept">Conditional rendering</span>
+      </div>
+
+      <h3>useParams — reading the URL id</h3>
+      <p><code>const { id } = useParams()</code> extracts the <code>:id</code> segment from the URL. If the URL is <code>/products/7</code>, then <code>id</code> is the string <code>"7"</code>. This value is passed directly to <code>fetchProductById(id)</code>.</p>
+
+      <h3>Scroll-to-top on id change</h3>
+      <p>A dedicated <code>useEffect</code> with <code>[id]</code> as its dependency calls <code>window.scrollTo({ top: 0, behavior: 'instant' })</code>. This fires before the fetch completes, immediately resetting the scroll position when any product link is clicked. <code>'instant'</code> (not <code>'smooth'</code>) is intentional — a smooth scroll from the middle of a previous product page to the top would look wrong. The <em>scroll happens first</em>, then the data loads.</p>
+
+      <h3>Data fetching pattern</h3>
+      <p>The fetch <code>useEffect</code> also has <code>[id]</code> as its dependency, so it re-runs whenever a different product is opened (not just on first mount). The inner <code>async function load()</code> pattern is required because <code>useEffect</code> callbacks cannot themselves be async — you define an async function inside and call it immediately. <code>setLoading(true)</code> and <code>setError(null)</code> are reset at the top so stale states from a previous product are cleared before loading begins.</p>
+
+      <h3>Conditional render guards</h3>
+      <p>Three render exits appear before the main JSX: loading state, error state, and a <code>null</code> guard if <code>product</code> is somehow still falsy after loading. This ensures the destructuring <code>const { title, price, ... } = product</code> only runs when the data is confirmed to exist — no runtime "cannot read property of null" errors.</p>
+
+      <h3>Image gallery state</h3>
+      <p><code>activeImage</code> is an integer index into the <code>allImages</code> array. Clicking a thumbnail calls <code>setActiveImage(i)</code>, which updates the index and causes React to re-render the main image with the selected source. <code>activeImage</code> is also reset to <code>0</code> inside the fetch success handler so switching products always shows the first image.</p>
+
+      <h3>Original price calculation</h3>
+      <p>The API returns <code>price</code> (discounted) and <code>discountPercentage</code>. The original price is derived by reversing the discount: <code>originalPrice = price / (1 - discountPercentage / 100)</code>. This is displayed crossed-out next to the sale price.</p>
+
+      <h3>Search from ProductDetail</h3>
+      <p>The <code>Header</code> calls <code>onSearchChange</code> on every keystroke AND on Enter/button click. <code>ProductDetail</code> needs to distinguish between the two because typing should only update local state, but submitting should navigate to Home. The <code>handleHeaderSearch</code> function detects submission by comparing the incoming value to <code>searchQuery.trim()</code> — if they are identical (no new character was typed), it means the Enter key or search button was pressed, so it calls <code>navigate('/?search=...')</code>. Otherwise it just updates local state to keep the input controlled.</p>
+
+      <h3>Seven content sections</h3>
+      <table>
+        <tbody>
+          <tr><th>Breadcrumb</th><td>Home › category › title. Uses React Router <code>&lt;Link&gt;</code> for the Home crumb so navigation is client-side.</td></tr>
+          <tr><th>Hero</th><td>Two-column: image gallery left, info panel right. Collapses to single column on mobile via CSS flexbox wrap.</td></tr>
+          <tr><th>Description</th><td>Plain text paragraph from the API's <code>description</code> field.</td></tr>
+          <tr><th>Specifications</th><td>HTML <code>&lt;table&gt;</code> — category, brand, SKU, weight, dimensions, min order qty, return policy. The <code>brand</code> and <code>dimensions</code> rows are conditionally rendered since some products omit them.</td></tr>
+          <tr><th>Availability &amp; Shipping</th><td>Four icon cards in a CSS grid — availability, shipping, warranty, returns. Collapses to 2-col on tablet and 1-col on mobile.</td></tr>
+          <tr><th>Reviews</th><td>Mapped from the <code>reviews</code> array. Each card shows an avatar (first letter of reviewer name), reviewer name, formatted date, star rating, and comment. The whole section is hidden if <code>reviews</code> is empty.</td></tr>
+          <tr><th>Meta / Product Info</th><td>Barcode, listed date, last-updated date from <code>meta</code>. Also shows the product's QR code image if present. Hidden if <code>meta</code> is null.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  
+  <div class="file-card">
+    <div class="file-card__header">
+      <span class="file-card__path">src/components/Header.jsx</span>
+      <span class="badge badge--mod">modified</span>
+    </div>
+    <div class="file-card__body">
+      <div class="concepts">
+        <span class="concept">useNavigate</span>
+        <span class="concept">useCallback</span>
+        <span class="concept">Link</span>
+        <span class="concept">scrollIntoView</span>
+        <span class="concept">Controlled input</span>
+        <span class="concept">Anchor interception</span>
+      </div>
+
+      <h3>Controlled search input</h3>
+      <p>The search <code>&lt;input&gt;</code> has <code>value={searchQuery}</code> and <code>onChange={(e) =&gt; onSearchChange(e.target.value)}</code>. This makes it a <strong>controlled input</strong> — React owns the value, not the DOM. Every keystroke calls the parent's handler, keeping the parent's state in sync with what's displayed.</p>
+
+      <h3>Three ways to submit a search</h3>
+      <ol>
+        <li><strong>Typing:</strong> <code>onChange</code> fires on every character, calling <code>onSearchChange</code> with the latest value.</li>
+        <li><strong>Enter key:</strong> <code>onKeyDown</code> fires; if the key is <code>'Enter'</code>, it calls <code>onSearchChange(e.target.value.trim())</code> — trimmed so leading/trailing spaces are removed.</li>
+        <li><strong>Search button click:</strong> <code>onClick</code> calls <code>onSearchChange(searchQuery.trim())</code> using the current state value.</li>
+      </ol>
+      <p>The <code>useCallback</code> around the <code>handleKeyDown</code> function memoises it so it isn't recreated on every render — it only recreates when <code>onSearchChange</code> changes. This prevents unnecessary re-subscriptions to the DOM event listener.</p>
+
+      <h3>Nav links — Link vs anchor</h3>
+      <p>All nav links are React Router <code>&lt;Link&gt;</code> components rather than plain <code>&lt;a&gt;</code> tags. This means clicking them does a <strong>client-side navigation</strong> — no full-page reload, no flash, the React tree stays alive. Only the URL and the matching route's component change.</p>
+
+      <h3>handleAnchorClick — anchor interception</h3>
+      <p>The <code>anchorMap</code> maps two virtual paths to real element IDs:</p>
+      <ul>
+        <li><code>'/#products'</code> → element with <code>id="products"</code> (the ProductList section)</li>
+        <li><code>'/#footer'</code> → element with <code>id="footer"</code> (the Footer)</li>
+      </ul>
+      <p>When one of these links is clicked, <code>e.preventDefault()</code> stops the default Link navigation, then <code>document.getElementById(targetId)</code> finds the DOM node. If it exists (user is already on Home), <code>scrollIntoView({ behavior: 'smooth' })</code> scrolls to it. If it doesn't exist (user is on ProductDetail), <code>navigate('/')</code> goes to Home first, then a <code>setTimeout</code> of 100ms gives React time to mount the home components before scrolling. Links without an entry in <code>anchorMap</code> (e.g. <code>'/'</code> for Home) fall through the early <code>return</code> and behave as normal client-side links.</p>
+    </div>
+  </div>
+
+  
+  <div class="file-card">
+    <div class="file-card__header">
+      <span class="file-card__path">src/components/ProductList.jsx</span>
+      <span class="badge badge--mod">modified</span>
+    </div>
+    <div class="file-card__body">
+      <div class="concepts">
+        <span class="concept">useEffect (fetch on mount)</span>
+        <span class="concept">useState</span>
+        <span class="concept">Client-side filtering</span>
+        <span class="concept">Client-side sorting</span>
+        <span class="concept">IIFE pattern</span>
+      </div>
+
+      <h3>Data fetching</h3>
+      <p>Fetches once on mount via <code>useEffect(load, [])</code>. The empty dependency array means the effect runs only when the component first mounts — not on every re-render. It calls <code>fetchProducts()</code> from <code>api.js</code> and stores the result in <code>products</code> state.</p>
+
+      <h3>Three-state loading pattern</h3>
+      <p><code>loading</code>, <code>error</code>, and <code>products</code> are three separate state values. The <code>finally</code> block in the <code>try/catch</code> always sets <code>loading</code> to <code>false</code> regardless of whether the fetch succeeded or failed, ensuring the loading spinner is always dismissed.</p>
+
+      <h3>Search filtering</h3>
+      <p><code>searchQuery</code> is lowercased and trimmed, then each product title is tested with <code>.includes(query)</code>. If the query is empty, the full product array is used. This is entirely <strong>client-side</strong> — the API is only called once; all filtering happens in memory.</p>
+
+      <h3>Tab sorting (IIFE pattern)</h3>
+      <p>An immediately-invoked function expression <code>(() =&gt; { ... })()</code> computes the final display array based on the active tab. It creates a shallow copy with <code>[...filteredProducts]</code> before sorting — <code>Array.sort()</code> mutates in place, so spreading first protects the original order for the "Latest Products" tab. Three modes: sort by <code>rating</code> descending, sort by <code>stock</code> descending, or return the filtered array as-is.</p>
+    </div>
+  </div>
+
+  
+  <div class="file-card">
+    <div class="file-card__header">
+      <span class="file-card__path">src/components/ProductCard.jsx</span>
+      <span class="badge badge--mod">modified</span>
+    </div>
+    <div class="file-card__body">
+      <div class="concepts">
+        <span class="concept">Link wrapper</span>
+        <span class="concept">CSS link reset</span>
+        <span class="concept">Lazy image loading</span>
+        <span class="concept">toFixed()</span>
+        <span class="concept">Array.from star rendering</span>
+      </div>
+
+      <h3>Link wrapper</h3>
+      <p>The entire card is wrapped in <code>&lt;Link to={`/products/${id}`}&gt;</code>. React Router's <code>Link</code> renders an <code>&lt;a&gt;</code> tag under the hood but intercepts the click to perform client-side navigation. The CSS class <code>.product-card__link</code> applies <code>display: block; text-decoration: none; color: inherit</code> to remove all default anchor styling so the card looks exactly as it did before — no blue underlines or color changes.</p>
+
+      <h3>StarRating component</h3>
+      <p><code>Array.from({ length: 5 }, (_, i) =&gt; ...)</code> creates an array of exactly 5 elements and maps each to a star span. The index <code>i</code> is compared to <code>Math.round(rating)</code> — stars below the rounded value get the <code>star--filled</code> class (orange), the rest stay grey. The rating number is displayed as <code>rating.toFixed(1)</code> — always one decimal place.</p>
+
+      <h3>Lazy loading</h3>
+      <p><code>loading="lazy"</code> on the <code>&lt;img&gt;</code> is a native browser attribute that defers loading the image until it is about to scroll into the viewport. With potentially 30 product images on screen, this significantly reduces initial page load bandwidth.</p>
+    </div>
+  </div>
+
+  
+  <div class="file-card">
+    <div class="file-card__header">
+      <span class="file-card__path">src/components/Footer.jsx</span>
+      <span class="badge badge--mod">modified</span>
+    </div>
+    <div class="file-card__body">
+      <div class="concepts">
+        <span class="concept">id="footer" scroll target</span>
+        <span class="concept">Controlled form input</span>
+        <span class="concept">e.preventDefault()</span>
+      </div>
+
+      <h3>Scroll target</h3>
+      <p><code>id="footer"</code> was added to the root <code>&lt;footer&gt;</code> element. This is the DOM node that <code>Header</code>'s <code>handleAnchorClick</code> targets when "About" or "Contact" is clicked.</p>
+
+      <h3>Newsletter form</h3>
+      <p>The email <code>&lt;input&gt;</code> is a controlled input — its value is bound to the <code>email</code> state. <code>handleSubscribe</code> calls <code>e.preventDefault()</code> to stop the form from triggering a full-page GET/POST request (the default browser behaviour for form submission), then resets <code>email</code> to <code>''</code>, clearing the input.</p>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  
+  <h2>3 · Cross-Cutting Feature Flows</h2>
+
+  <h3>Flow A — Clicking a product card</h3>
+  <div class="flow">1. User clicks a ProductCard
+2. &lt;Link to="/products/7"&gt; fires a client-side navigation
+3. BrowserRouter updates the URL to /products/7
+4. React Router matches Route path="/products/:id" → mounts ProductDetail
+5. useEffect([id]) fires immediately → window.scrollTo top
+6. useEffect([id]) fires → fetchProductById("7") called
+7. Loading state shown (Header + "Loading product…" + Footer)
+8. API responds → setProduct(data), setLoading(false)
+9. Full product page renders with all 7 sections</div>
+
+  <h3>Flow B — Searching from the Homepage</h3>
+  <div class="flow">1. User types "mascara" into Header search input
+2. Header onChange → onSearchChange("mascara") (every keystroke)
+3. Home.handleSearchChange sets searchQuery = "mascara"
+4. First call with a new value → scrollIntoView("#products") fires
+5. ProductList receives searchQuery="mascara" as prop
+6. filteredProducts = products.filter(p =&gt; title includes "mascara")
+7. Grid re-renders showing only matching products
+8. User presses Enter → Header onKeyDown → onSearchChange("mascara")
+9. Same trimmed value → handleSearchChange detects no change, no extra scroll</div>
+
+  <h3>Flow C — Searching from ProductDetail</h3>
+  <div class="flow">1. User types "shoes" in Header search input on ProductDetail page
+2. Header onChange → handleHeaderSearch("shoes") — new value → setSearchQuery
+3. User presses Enter → Header onKeyDown → handleHeaderSearch("shoes")
+4. trimmed ("shoes") === searchQuery.trim() ("shoes") AND non-empty
+5. → handleSearchSubmit fires → navigate("/?search=shoes")
+6. BrowserRouter navigates to / 
+7. Home mounts with location.search = "?search=shoes"
+8. Lazy initialiser reads "shoes" → searchQuery starts pre-filled
+9. Mount-time useEffect([]) detects ?search → scrollIntoView("#products") after 50ms
+10. ProductList filters to "shoes" products immediately</div>
+
+  <h3>Flow D — Clicking "Products" / "About" / "Contact" from any page</h3>
+  <div class="flow">Scenario 1: Already on Home
+  Click → handleAnchorClick → getElementById("products" or "footer") found
+  → scrollIntoView({ behavior: "smooth" })
+
+Scenario 2: On ProductDetail
+  Click → handleAnchorClick → getElementById not found (element not in DOM)
+  → navigate("/") → Home mounts → setTimeout 100ms
+  → getElementById found → scrollIntoView({ behavior: "smooth" })</div>
+
+  <hr class="divider" />
+
+  
+  <h2>4 · React Hooks Reference</h2>
+
+  <table>
+    <tbody>
+      <tr><th>useState</th><td>Stores a value that, when changed, causes the component to re-render. Used for <code>searchQuery</code>, <code>products</code>, <code>loading</code>, <code>error</code>, <code>activeImage</code>, <code>email</code>.</td></tr>
+      <tr><th>useEffect</th><td>Runs side-effects after render. Dependency array controls when it re-runs: <code>[]</code> = once on mount, <code>[id]</code> = whenever <code>id</code> changes, <code>[location.search]</code> = whenever the URL query string changes.</td></tr>
+      <tr><th>useRef</th><td>Stores a mutable value that persists across renders without triggering re-renders. Used in <code>Home</code> to remember the previous search query so scroll deduplication works.</td></tr>
+      <tr><th>useCallback</th><td>Memoises a function so it keeps the same reference between renders unless its dependencies change. Used in <code>Header</code> for <code>handleKeyDown</code> to avoid creating a new function object every render.</td></tr>
+      <tr><th>useParams</th><td>React Router hook. Reads dynamic URL segments (e.g. <code>:id</code>) as an object.</td></tr>
+      <tr><th>useNavigate</th><td>React Router hook. Returns a <code>navigate(path)</code> function for programmatic navigation — used to push <code>/?search=query</code> from ProductDetail, and to go to <code>/</code> before a scroll in Header.</td></tr>
+      <tr><th>useLocation</th><td>React Router hook. Returns the current URL's location object (<code>pathname</code>, <code>search</code>, <code>hash</code>, <code>state</code>). Used in Home to read <code>?search=</code>.</td></tr>
+    </tbody>
+  </table>
+
+  <footer class="page-footer">Made with IBM Bob</footer>
+</div>
+</body>
+</html>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './ProductCard.css';
 
 function StarRating({ rating }) {
@@ -16,9 +17,10 @@ function StarRating({ rating }) {
 }
 
 function ProductCard({ product }) {
-  const { title, price, rating, thumbnail, category } = product;
+  const { id, title, price, rating, thumbnail, category } = product;
 
   return (
+    <Link to={`/products/${id}`} className="product-card__link">
     <div className="product-card">
       <div className="product-card__image-wrap">
         <img
@@ -35,6 +37,7 @@ function ProductCard({ product }) {
         <p className="product-card__price">${price.toFixed(2)}</p>
       </div>
     </div>
+    </Link>
   );
 }
 

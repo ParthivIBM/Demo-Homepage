@@ -25,7 +25,7 @@ function Footer() {
   };
 
   return (
-    <footer className="footer">
+    <footer className="footer" id="footer">
       {/* Newsletter strip */}
       <div className="footer__newsletter">
         <div className="footer__newsletter-inner">

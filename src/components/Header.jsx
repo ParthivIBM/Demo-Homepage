@@ -1,15 +1,18 @@
 import React from 'react';
 import { useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
 
 const navLinks = [
-  { label: 'Home', href: '/' },
-  { label: 'Products', href: '/products' },
-  { label: 'About', href: '/about' },
-  { label: 'Contact', href: '/contact' },
+  { label: 'Home', to: '/' },
+  { label: 'Products', to: '/#products' },
+  { label: 'About', to: '/#footer' },
+  { label: 'Contact', to: '/#footer' },
 ];
 
 function Header({ searchQuery = '', onSearchChange }) {
+  const navigate = useNavigate();
+
   const handleKeyDown = useCallback(
     (e) => {
       if (e.key === 'Enter') {
@@ -19,22 +22,47 @@ function Header({ searchQuery = '', onSearchChange }) {
     [onSearchChange]
   );
 
+  function handleAnchorClick(e, to) {
+    const anchorMap = {
+      '/#products': 'products',
+      '/#footer': 'footer',
+    };
+    const targetId = anchorMap[to];
+    if (!targetId) return;
+
+    e.preventDefault();
+    const el = document.getElementById(targetId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // Not on homepage yet — navigate there then scroll
+      navigate('/');
+      setTimeout(() => {
+        document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }
+
   return (
     <header className="header">
       <div className="header__inner">
         {/* Logo */}
-        <a href="/" className="header__logo">
+        <Link to="/" className="header__logo">
           LOGO
-        </a>
+        </Link>
 
         {/* Nav */}
         <nav className="header__nav">
           <ul className="header__nav-list">
-            {navLinks.map(({ label, href }) => (
+            {navLinks.map(({ label, to }) => (
               <li key={label} className="header__nav-item">
-                <a href={href} className="header__nav-link">
+                <Link
+                  to={to}
+                  className="header__nav-link"
+                  onClick={(e) => handleAnchorClick(e, to)}
+                >
                   {label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
