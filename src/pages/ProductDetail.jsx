@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { fetchProductById } from '../api';
+import { useCart } from '../context/CartContext';
 import './ProductDetail.css';
 
 /* ── Helpers ─────────────────────────────────────────── */
@@ -30,6 +31,7 @@ function formatDate(iso) {
 function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addToCart, isInCart } = useCart();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -204,6 +206,18 @@ function ProductDetail() {
                 </span>
                 <span className="pd-info__stock-count">{stock} units available</span>
               </div>
+
+              <button
+                className={`pd-info__atc-btn${isInCart(product.id) ? ' pd-info__atc-btn--added' : ''}`}
+                onClick={() => { if (!isInCart(product.id)) addToCart(product); }}
+                disabled={isInCart(product.id) || stock === 0}
+              >
+                {stock === 0
+                  ? 'Out of Stock'
+                  : isInCart(product.id)
+                  ? '✓ Added to Cart'
+                  : 'Add to Cart'}
+              </button>
 
               {tags && tags.length > 0 && (
                 <div className="pd-info__tags">

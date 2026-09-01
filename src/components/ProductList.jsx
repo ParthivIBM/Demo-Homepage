@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
 import { fetchProducts } from '../api';
+import { useCart } from '../context/CartContext';
 import './ProductList.css';
 
 const TABS = ['Top Rated', 'Best Selling', 'Latest Products'];
 
 function ProductList({ searchQuery = '' }) {
+  const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -83,7 +85,7 @@ function ProductList({ searchQuery = '' }) {
         {!loading && !error && displayedProducts.length > 0 && (
           <div className="product-list__grid">
             {displayedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id} product={product} onAddToCart={addToCart} />
             ))}
           </div>
         )}

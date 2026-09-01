@@ -1,6 +1,7 @@
 import React from 'react';
 import { useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 import './Header.css';
 
 const navLinks = [
@@ -12,6 +13,7 @@ const navLinks = [
 
 function Header({ searchQuery = '', onSearchChange }) {
   const navigate = useNavigate();
+  const { cartCount } = useCart();
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -91,9 +93,14 @@ function Header({ searchQuery = '', onSearchChange }) {
           <button className="header__icon-btn" aria-label="Wishlist" type="button">
             ♡
           </button>
-          <button className="header__icon-btn header__cart-btn" aria-label="Cart" type="button">
+          <button
+            className="header__icon-btn header__cart-btn"
+            aria-label="Cart"
+            type="button"
+            onClick={() => navigate('/cart')}
+          >
             🛒
-            <span className="header__cart-badge">0</span>
+            <span className="header__cart-badge">{cartCount}</span>
           </button>
           <button className="header__icon-btn" aria-label="Account" type="button">
             👤
