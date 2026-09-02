@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
@@ -7,6 +7,7 @@ import './Cart.css';
 
 function Cart() {
   const { cartItems, removeFromCart, updateQuantity, cartCount } = useCart();
+  const navigate = useNavigate();
 
   useEffect(() => {
       window.scrollTo({ top: 0, behavior: 'instant' });
@@ -93,7 +94,7 @@ function Cart() {
                   <span>Total</span>
                   <span>${subtotal.toFixed(2)}</span>
                 </div>
-                <button className="cart-summary__checkout-btn">
+                <button className="cart-summary__checkout-btn" onClick={() => navigate('/checkout')}>
                   Proceed to Checkout
                 </button>
                 <Link to="/" className="cart-summary__continue">
