@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import './Checkout.css';
 
@@ -55,6 +55,7 @@ function validate(form) {
 
 function Checkout() {
   const { cartItems } = useCart();
+  const navigate = useNavigate();
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [shipping, setShipping] = useState('standard');
@@ -86,8 +87,22 @@ function Checkout() {
       const firstKey = REQUIRED_FIELDS.find((k) => newErrors[k]);
       const el = document.querySelector(`[name="${firstKey}"]`);
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
     }
-    // No navigation — payment not yet implemented
+
+    navigate('/payment', {
+      state: {
+        order: {
+          customer: form,
+          shippingMethod: selectedShipping,
+          items: cartItems.map((item) => ({ ...item })),
+          subtotal,
+          shippingCost,
+          tax,
+          total,
+        },
+      },
+    });
   }
 
   function inputClass(field) {
