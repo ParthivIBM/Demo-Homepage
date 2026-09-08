@@ -1,0 +1,61 @@
+.about-content {
+  background-color: #ffffff;
+}
+
+.about-content__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 64px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+.about-section__title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f2328;
+  margin-bottom: 16px;
+  border-left: 3px solid #3b82d4;
+  padding-left: 12px;
+}
+
+.about-section__body {
+  font-size: 15px;
+  color: #57606a;
+  line-height: 1.7;
+  max-width: 720px;
+}
+
+.about-values {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
+  margin-top: 8px;
+}
+
+.about-value-card {
+  background-color: #f7f8fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 24px;
+}
+
+.about-value-card__icon {
+  font-size: 28px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.about-value-card__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1f2328;
+  margin-bottom: 8px;
+}
+
+.about-value-card__body {
+  font-size: 14px;
+  color: #57606a;
+  line-height: 1.6;
+}

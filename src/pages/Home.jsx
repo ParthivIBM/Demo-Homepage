@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import Header from '../components/Header';
-import Banner from '../components/Banner';
-import ProductList from '../components/ProductList';
-import Footer from '../components/Footer';
+import Header from '../components/Header/Header';
+import Banner from '../components/Banner/Banner';
+import ProductList from '../components/Product/ProductList';
+import Footer from '../components/Footer/Footer';
 
 function Home() {
   const location = useLocation();

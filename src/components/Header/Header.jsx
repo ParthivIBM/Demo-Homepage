@@ -1,19 +1,21 @@
 import React from 'react';
 import { useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import './Header.css';
 
 const navLinks = [
   { label: 'Home', to: '/' },
   { label: 'Products', to: '/#products' },
-  { label: 'About', to: '/#footer' },
-  { label: 'Contact', to: '/#footer' },
+  { label: 'About', to: '/about' },
+  { label: 'Contact', to: '/contact' },
 ];
 
-function Header({ searchQuery = '', onSearchChange }) {
+function Header({ searchQuery = '', onSearchChange, showSearch = true }) {
   const navigate = useNavigate();
   const { cartCount } = useCart();
+  const { currentUser, logout } = useAuth();
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -27,7 +29,6 @@ function Header({ searchQuery = '', onSearchChange }) {
   function handleAnchorClick(e, to) {
     const anchorMap = {
       '/#products': 'products',
-      '/#footer': 'footer',
     };
     const targetId = anchorMap[to];
     if (!targetId) return;
@@ -72,24 +73,26 @@ function Header({ searchQuery = '', onSearchChange }) {
 
         {/* Actions */}
         <div className="header__actions">
-          <div className="header__search">
-            <input
-              type="text"
-              value={searchQuery}
-              placeholder="Search for products..."
-              className="header__search-input"
-              onChange={(e) => onSearchChange(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
-            <button
-              className="header__icon-btn header__search-btn"
-              aria-label="Search"
-              type="button"
-              onClick={() => onSearchChange(searchQuery.trim())}
-            >
-              🔍
-            </button>
-          </div>
+          {showSearch && (
+            <div className="header__search">
+              <input
+                type="text"
+                value={searchQuery}
+                placeholder="Search for products..."
+                className="header__search-input"
+                onChange={(e) => onSearchChange(e.target.value)}
+                onKeyDown={handleKeyDown}
+              />
+              <button
+                className="header__icon-btn header__search-btn"
+                aria-label="Search"
+                type="button"
+                onClick={() => onSearchChange(searchQuery.trim())}
+              >
+                🔍
+              </button>
+            </div>
+          )}
           <button className="header__icon-btn" aria-label="Wishlist" type="button">
             ♡
           </button>
@@ -102,9 +105,23 @@ function Header({ searchQuery = '', onSearchChange }) {
             🛒
             <span className="header__cart-badge">{cartCount}</span>
           </button>
-          <button className="header__icon-btn" aria-label="Account" type="button">
-            👤
-          </button>
+          <div className="header__user">
+            <span className="header__username">Hi, {currentUser}</span>
+            <button
+              className="header__orders-btn"
+              type="button"
+              onClick={() => navigate('/track-order')}
+            >
+              📦 Orders
+            </button>
+            <button
+              className="header__logout-btn"
+              type="button"
+              onClick={() => { logout(); navigate('/login'); }}
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </div>
     </header>

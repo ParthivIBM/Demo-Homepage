@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../../context/CartContext';
 import './Checkout.css';
 
 const STEPS = ['Cart', 'Checkout', 'Payment', 'Confirmation'];
@@ -50,6 +50,11 @@ function validate(form) {
   if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
     errors.email = 'Enter a valid email address';
   }
+  if (form.phone && /\D/.test(form.phone)) {
+    errors.phone = 'Phone number must contain digits only';
+  } else if (form.phone && form.phone.length !== 10) {
+    errors.phone = 'Phone number must be exactly 10 digits';
+  }
   return errors;
 }
 
@@ -59,6 +64,18 @@ function Checkout() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [shipping, setShipping] = useState('standard');
+
+  // Refs for each required field — used to focus the first invalid field on submit
+  const fieldRefs = {
+    email:    useRef(null),
+    phone:    useRef(null),
+    fullName: useRef(null),
+    address:  useRef(null),
+    city:     useRef(null),
+    state:    useRef(null),
+    zip:      useRef(null),
+    country:  useRef(null),
+  };
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -83,10 +100,11 @@ function Checkout() {
     const newErrors = validate(form);
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      // Scroll to first error
+      // Focus the first invalid field using its ref
       const firstKey = REQUIRED_FIELDS.find((k) => newErrors[k]);
-      const el = document.querySelector(`[name="${firstKey}"]`);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (firstKey && fieldRefs[firstKey]?.current) {
+        fieldRefs[firstKey].current.focus();
+      }
       return;
     }
 
@@ -155,14 +173,15 @@ function Checkout() {
                 <div className="checkout-field">
                   <label className="checkout-field__label" htmlFor="email">Email Address</label>
                   <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    className={inputClass('email')}
-                    value={form.email}
-                    onChange={handleChange}
-                    placeholder="john.doe@example.com"
-                  />
+                   id="email"
+                   name="email"
+                   type="email"
+                   ref={fieldRefs.email}
+                   className={inputClass('email')}
+                   value={form.email}
+                   onChange={handleChange}
+                   placeholder="john.doe@example.com"
+                 />
                   {errors.email && <span className="checkout-field__error">{errors.email}</span>}
                 </div>
                 <div className="checkout-field">
@@ -171,6 +190,7 @@ function Checkout() {
                     id="phone"
                     name="phone"
                     type="tel"
+                    ref={fieldRefs.phone}
                     className={inputClass('phone')}
                     value={form.phone}
                     onChange={handleChange}
@@ -191,6 +211,7 @@ function Checkout() {
                   id="fullName"
                   name="fullName"
                   type="text"
+                  ref={fieldRefs.fullName}
                   className={inputClass('fullName')}
                   value={form.fullName}
                   onChange={handleChange}
@@ -205,6 +226,7 @@ function Checkout() {
                   id="address"
                   name="address"
                   type="text"
+                  ref={fieldRefs.address}
                   className={inputClass('address')}
                   value={form.address}
                   onChange={handleChange}
@@ -235,6 +257,7 @@ function Checkout() {
                     id="city"
                     name="city"
                     type="text"
+                    ref={fieldRefs.city}
                     className={inputClass('city')}
                     value={form.city}
                     onChange={handleChange}
@@ -249,6 +272,7 @@ function Checkout() {
                     id="state"
                     name="state"
                     type="state"
+                    ref={fieldRefs.state}
                     className={inputClass('state')}
                     value={form.state}
                     onChange={handleChange}
@@ -263,6 +287,7 @@ function Checkout() {
                     id="zip"
                     name="zip"
                     type="text"
+                    ref={fieldRefs.zip}
                     className={inputClass('zip')}
                     value={form.zip}
                     onChange={handleChange}
@@ -278,6 +303,7 @@ function Checkout() {
                   <select
                     id="country"
                     name="country"
+                    ref={fieldRefs.country}
                     className={selectClass('country')}
                     value={form.country}
                     onChange={handleChange}

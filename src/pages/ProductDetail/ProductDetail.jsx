@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import { fetchProductById } from '../api';
-import { useCart } from '../context/CartContext';
+import Header from '../../components/Header/Header';
+import Footer from '../../components/Footer/Footer';
+import { fetchProductById } from '../../api';
+import { useCart } from '../../context/CartContext';
+import useFetch from '../../hooks/useFetch';
 import './ProductDetail.css';
 
 /* ── Helpers ─────────────────────────────────────────── */
@@ -33,32 +34,14 @@ function ProductDetail() {
   const navigate = useNavigate();
   const { addToCart, isInCart } = useCart();
 
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { data: product, loading, error } = useFetch(fetchProductById, id);
   const [activeImage, setActiveImage] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Scroll to top whenever the product changes
+  // Scroll to top and reset gallery index whenever the product changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [id]);
-
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
-    async function load() {
-      try {
-        const data = await fetchProductById(id);
-        setProduct(data);
-        setActiveImage(0);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
+    setActiveImage(0);
   }, [id]);
 
   /* Search navigates back to Home with the query param */

@@ -1,0 +1,128 @@
+.contact-content {
+  background-color: #ffffff;
+}
+
+.contact-content__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 64px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+/* Contact info cards */
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 24px;
+}
+
+.contact-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background-color: #f7f8fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 24px;
+}
+
+.contact-card__icon {
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.contact-card__label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #57606a;
+  margin-bottom: 4px;
+}
+
+.contact-card__value {
+  font-size: 14px;
+  color: #1f2328;
+  line-height: 1.5;
+}
+
+/* Form */
+.contact-form-wrap__title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f2328;
+  margin-bottom: 24px;
+  border-left: 3px solid #3b82d4;
+  padding-left: 12px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 680px;
+}
+
+.contact-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.contact-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.contact-form__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2328;
+}
+
+.contact-form__input,
+.contact-form__textarea {
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #1f2328;
+  background-color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.contact-form__input:focus,
+.contact-form__textarea:focus {
+  border-color: #3b82d4;
+}
+
+.contact-form__submit {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 12px 28px;
+  border: 2px solid #1f2328;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2328;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.contact-form__submit:hover {
+  background-color: #1f2328;
+  color: #ffffff;
+}
+
+@media (max-width: 600px) {
+  .contact-form__row {
+    grid-template-columns: 1fr;
+  }
+}

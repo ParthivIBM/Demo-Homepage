@@ -1,8 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import './Checkout.css';
 import './Payment.css';
+
+const ORDERS_KEY = 'app_orders';
+
+function generateOrderNumber() {
+  const hex = Math.random().toString(16).slice(2, 6).toUpperCase();
+  return `ORD-${Date.now()}-${hex}`;
+}
+
+function loadOrders() {
+  try {
+    return JSON.parse(localStorage.getItem(ORDERS_KEY)) ?? [];
+  } catch {
+    return [];
+  }
+}
 
 const STEPS = ['Cart', 'Checkout', 'Payment', 'Confirmation'];
 
@@ -10,6 +26,7 @@ function Payment() {
   const navigate = useNavigate();
   const location = useLocation();
   const { clearCart } = useCart();
+  const { currentUser } = useAuth();
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const order = location.state?.order;
 
@@ -29,11 +46,20 @@ function Payment() {
   function handlePlaceOrder() {
     if (paymentMethod !== 'cod') return;
 
+    const orderNumber = generateOrderNumber();
+
     const completedOrder = {
       ...order,
+      orderNumber,
       paymentMethod: 'Cash on Delivery',
       itemCount,
+      placedAt: new Date().toISOString(),
+      username: currentUser,
     };
+
+    // Persist to localStorage so it can be looked up by order number
+    const existing = loadOrders();
+    localStorage.setItem(ORDERS_KEY, JSON.stringify([...existing, completedOrder]));
 
     clearCart();
     navigate('/congratulations', { state: { order: completedOrder } });

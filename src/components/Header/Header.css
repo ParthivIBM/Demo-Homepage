@@ -126,3 +126,53 @@
     justify-content: space-between;
   }
 }
+
+/* User / Auth */
+.header__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header__username {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2328;
+  white-space: nowrap;
+}
+
+.header__logout-btn {
+  padding: 5px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #57606a;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.header__logout-btn:hover {
+  border-color: #cf222e;
+  color: #cf222e;
+}
+
+.header__orders-btn {
+  padding: 5px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #57606a;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.header__orders-btn:hover {
+  border-color: #3b82d4;
+  color: #3b82d4;
+}

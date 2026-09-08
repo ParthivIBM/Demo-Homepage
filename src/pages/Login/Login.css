@@ -1,0 +1,150 @@
+.login-page {
+  min-height: 100vh;
+  background-color: #f7f8fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.login-card__logo {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1f2328;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+
+.login-card__tagline {
+  font-size: 13px;
+  color: #57606a;
+  margin-bottom: 28px;
+}
+
+/* Tabs */
+.login-card__tabs {
+  display: flex;
+  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 28px;
+}
+
+.login-card__tab {
+  flex: 1;
+  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #57606a;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.login-card__tab--active {
+  color: #1f2328;
+  border-bottom-color: #3b82d4;
+}
+
+.login-card__tab:hover:not(.login-card__tab--active) {
+  color: #1f2328;
+}
+
+/* Form */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.login-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-form__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2328;
+}
+
+.login-form__input {
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #1f2328;
+  background-color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.login-form__input:focus {
+  border-color: #3b82d4;
+}
+
+.login-form__error {
+  font-size: 13px;
+  color: #cf222e;
+  margin: 0;
+}
+
+.login-form__submit {
+  padding: 12px;
+  background-color: #1f2328;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: inherit;
+  margin-top: 4px;
+}
+
+.login-form__submit:hover {
+  background-color: #3b82d4;
+}
+
+/* Switch link row */
+.login-card__switch {
+  margin-top: 20px;
+  font-size: 13px;
+  color: #57606a;
+  text-align: center;
+}
+
+.login-card__switch-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3b82d4;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.login-card__switch-btn:hover {
+  text-decoration: underline;
+}
+
+.login-card__track-hint {
+  font-size: 13px;
+  color: #57606a;
+  margin-bottom: 4px;
+  line-height: 1.5;
+}

@@ -5,7 +5,6 @@ import './Payment.css';
 import './Congratulations.css';
 
 const STEPS = ['Cart', 'Checkout', 'Payment', 'Confirmation'];
-const ORDER_NUMBER = 'ORD12345678';
 
 function Congratulations() {
   const location = useLocation();
@@ -53,7 +52,7 @@ function Congratulations() {
 
           <div className="confirmation-number">
             <span>Your Order Number</span>
-            <strong>{ORDER_NUMBER}</strong>
+            <strong>{order.orderNumber}</strong>
           </div>
         </section>
 

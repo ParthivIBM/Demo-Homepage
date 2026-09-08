@@ -1,37 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ProductCard from './ProductCard';
-import { fetchProducts } from '../api';
-import { useCart } from '../context/CartContext';
+import { fetchProducts } from '../../api';
+import { useCart } from '../../context/CartContext';
+import useFetch from '../../hooks/useFetch';
 import './ProductList.css';
 
 const TABS = ['Top Rated', 'Best Selling', 'Latest Products'];
 
 function ProductList({ searchQuery = '' }) {
   const { addToCart } = useCart();
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { data: products, loading, error } = useFetch(fetchProducts);
   const [activeTab, setActiveTab] = useState('Top Rated');
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const products = await fetchProducts();
-        setProducts(products);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, []);
-
   const query = searchQuery.toLowerCase().trim();
+  const productList = products ?? [];
 
   const filteredProducts = query
-    ? products.filter((p) => p.title.toLowerCase().includes(query))
-    : products;
+    ? productList.filter((p) => p.title.toLowerCase().includes(query))
+    : productList;
 
   const displayedProducts = (() => {
     if (activeTab === 'Top Rated') {
